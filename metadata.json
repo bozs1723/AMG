@@ -1,0 +1,8 @@
+{
+  "name": "Asia Medicare Group Portal",
+  "description": "Premium healthcare concierge and membership portal for Asia Medicare Group, featuring multi-language support, loyalty points, appointment booking, and AI-powered chat assistance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}

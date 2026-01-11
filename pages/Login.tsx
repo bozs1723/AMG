@@ -1,19 +1,20 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, ShieldCheck, ArrowRight, User, Loader2, Github, Zap } from 'lucide-react';
+import { LogIn, Mail, Lock, ShieldCheck, ArrowRight, User, Loader2, Zap, Check } from 'lucide-react';
 import { db } from '../services/database';
 import Logo from '../components/Logo';
 
 interface LoginProps {
   t: (key: string) => string;
+  onLogin: () => Promise<any>;
 }
 
-const Login: React.FC<LoginProps> = ({ t }) => {
+const Login: React.FC<LoginProps> = ({ t, onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSocialLoading, setIsSocialLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -24,7 +25,9 @@ const Login: React.FC<LoginProps> = ({ t }) => {
     
     try {
       await db.signIn(email, password);
-      window.location.href = '/'; 
+      await onLogin();
+      setIsSuccess(true);
+      setTimeout(() => navigate('/profile'), 800);
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.');
       setIsLoading(false);
@@ -33,23 +36,25 @@ const Login: React.FC<LoginProps> = ({ t }) => {
 
   const handleQuickLogin = async () => {
     setIsLoading(true);
-    try {
-      await db.signIn('demo@asiamedicare.com', 'password123');
-      window.location.href = '/';
-    } catch (err) {
-      setIsLoading(false);
-    }
-  };
-
-  const handleGithubLogin = async () => {
-    setIsSocialLoading(true);
     setError(null);
     try {
-      await db.signInWithGithub();
-      window.location.href = '/';
-    } catch (err: any) {
-      setError(err.message || 'Failed to connect with GitHub.');
-      setIsSocialLoading(false);
+      // 1. สั่ง SignIn ใน Mock Database
+      await db.signIn('demo@asiamedicare.com', 'password123');
+      
+      // 2. เรียก onLogin (refreshUser ใน App.tsx) เพื่ออัปเดต React State
+      const user = await onLogin();
+      
+      if (user) {
+        setIsSuccess(true);
+        // 3. นำทางไปยังหน้า Profile เพื่อยืนยันว่าเข้าได้จริง
+        setTimeout(() => navigate('/profile'), 1000);
+      } else {
+        throw new Error("Failed to update user session");
+      }
+    } catch (err) {
+      console.error("Quick Login Error:", err);
+      setIsLoading(false);
+      setError('Unable to activate Demo Account. Please try again.');
     }
   };
 
@@ -83,16 +88,28 @@ const Login: React.FC<LoginProps> = ({ t }) => {
           <button
             onClick={handleQuickLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-between p-4 bg-blue-50 border border-blue-100 rounded-2xl group hover:bg-blue-600 transition-all duration-300"
+            className={`w-full flex items-center justify-between p-5 rounded-2xl border transition-all duration-300 group ${
+              isSuccess ? 'bg-green-500 border-green-600 text-white' : 'bg-blue-50 border-blue-100 hover:bg-blue-600'
+            }`}
           >
-            <div className="flex items-center space-x-3 text-blue-600 group-hover:text-white transition-colors">
-              <Zap size={20} className="fill-current" />
+            <div className={`flex items-center space-x-4 ${isSuccess ? 'text-white' : 'text-blue-600 group-hover:text-white'}`}>
+              <div className={`p-2 rounded-xl ${isSuccess ? 'bg-white/20' : 'bg-white shadow-sm'}`}>
+                {isSuccess ? <Check size={20} /> : <Zap size={20} className="fill-current" />}
+              </div>
               <div className="text-left">
-                <p className="text-xs font-black uppercase tracking-widest">Try Demo Member</p>
-                <p className="text-[10px] opacity-70 font-bold uppercase">One-click experience</p>
+                <p className="text-xs font-black uppercase tracking-widest">
+                  {isSuccess ? 'Access Granted' : 'Try Demo Member'}
+                </p>
+                <p className={`text-[10px] font-bold uppercase ${isSuccess ? 'text-white/80' : 'opacity-70'}`}>
+                  {isSuccess ? 'Redirecting to Profile...' : 'One-click VIP experience'}
+                </p>
               </div>
             </div>
-            <ArrowRight size={18} className="text-blue-300 group-hover:text-white" />
+            {isLoading && !isSuccess ? (
+              <Loader2 className="animate-spin text-blue-300" size={18} />
+            ) : (
+              !isSuccess && <ArrowRight size={18} className="text-blue-300 group-hover:text-white" />
+            )}
           </button>
 
           <div className="relative py-2">
@@ -139,10 +156,10 @@ const Login: React.FC<LoginProps> = ({ t }) => {
 
             <button
               type="submit"
-              disabled={isLoading || isSocialLoading}
+              disabled={isLoading}
               className="w-full flex items-center justify-center space-x-3 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl bg-[#3498db] text-white hover:bg-[#2980b9] shadow-blue-100 disabled:opacity-50"
             >
-              {isLoading ? (
+              {isLoading && !isSuccess ? (
                 <Loader2 className="animate-spin" size={18} />
               ) : (
                 <>

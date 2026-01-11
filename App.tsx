@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { 
   Home as HomeIcon, 
@@ -44,22 +44,40 @@ const AppContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // ตรวจสอบ Mock Session จาก LocalStorage
-    const checkSession = async () => {
-      const mockUser = localStorage.getItem('asia_medicare_mock_user');
-      if (mockUser) {
-        const parsedUser = JSON.parse(mockUser);
+  // Corrected refreshUser to ensure setLoading(false) always runs
+  const refreshUser = useCallback(async () => {
+    const mockUserString = localStorage.getItem('asia_medicare_mock_user');
+    let parsedUser = null;
+    
+    if (mockUserString) {
+      try {
+        parsedUser = JSON.parse(mockUserString);
         setUser(parsedUser);
-        if (parsedUser.email === 'admin@asiamedicare.com' || parsedUser.email === 'thedecor.th@gmail.com') {
+        
+        // Multiple admin emails for system flexibility
+        const adminEmails = ['admin@asiamedicare.com', 'thedecor.th@gmail.com', 'manager@asiamedicare.com'];
+        if (adminEmails.includes(parsedUser.email)) {
           setIsAdmin(true);
+        } else {
+          setIsAdmin(false);
         }
+      } catch (e) {
+        console.error("Session parse error", e);
+        setUser(null);
+        setIsAdmin(false);
       }
-      setLoading(false);
-    };
-
-    checkSession();
+    } else {
+      setUser(null);
+      setIsAdmin(false);
+    }
+    
+    setLoading(false);
+    return parsedUser;
   }, []);
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   const t = (key: string) => translations[lang][key] || key;
   const isRTL = lang === 'ar';
@@ -71,7 +89,7 @@ const AppContent: React.FC = () => {
       const updated = await db.updateProfile(user.id, { points: newPoints });
       setUser(updated);
     } catch (err) {
-      console.error('Failed to update points:', err);
+      console.error('Points update error:', err);
     }
   };
 
@@ -88,7 +106,7 @@ const AppContent: React.FC = () => {
         <div className="text-center space-y-4">
           <Logo showText={false} />
           <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-blue-200 font-black uppercase tracking-widest text-[10px]">Initializing Concierge...</p>
+          <p className="text-blue-200 font-black uppercase tracking-widest text-[10px]">Verifying VIP Session...</p>
         </div>
       </div>
     );
@@ -214,7 +232,7 @@ const AppContent: React.FC = () => {
                 </>
               ) : (
                 <Link to="/profile" className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-[#3498db] font-black border border-blue-100">
-                  {user.name.charAt(0)}
+                  {(user.name || 'U').charAt(0)}
                 </Link>
               )}
             </div>
@@ -250,7 +268,7 @@ const AppContent: React.FC = () => {
               <div className="p-4 bg-blue-50 rounded-2xl flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#3498db] font-black">
-                     {user.name.charAt(0)}
+                     {(user.name || 'U').charAt(0)}
                    </div>
                    <div>
                      <p className="text-sm font-black text-[#0a1d4a] uppercase">{user.name}</p>
@@ -289,14 +307,14 @@ const AppContent: React.FC = () => {
           />
           <Route 
             path="/booking" 
-            element={user ? <Booking user={user} t={t} lang={lang} /> : <Navigate to="/login" />} 
+            element={user ? <Booking t={t} lang={lang} /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/profile" 
             element={user ? <Profile user={user} setUser={setUser} t={t} lang={lang} onLogout={handleLogout} /> : <Navigate to="/login" />} 
           />
-          <Route path="/login" element={<Login t={t} />} />
-          <Route path="/signup" element={<Signup t={t} />} />
+          <Route path="/login" element={<Login t={t} onLogin={refreshUser} />} />
+          <Route path="/signup" element={<Signup t={t} onLogin={refreshUser} />} />
           <Route path="/faq" element={<FAQ t={t} lang={lang} />} />
           <Route path="/contact" element={<Contact t={t} lang={lang} />} />
           <Route path="/admin" element={isAdmin ? <AdminDashboard t={t} /> : <Navigate to="/" />} />

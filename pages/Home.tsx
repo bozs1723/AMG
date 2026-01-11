@@ -1,8 +1,54 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, ShieldCheck, Star, Clock, Heart, Award, Crown, HeartPulse, Building2 } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Star, Clock, Heart, Award, Crown, HeartPulse, Building2, Globe } from 'lucide-react';
 import { Language } from '../types';
+
+interface PartnerLogoProps {
+  partner: { name: string; domain: string };
+}
+
+const PartnerLogo: React.FC<PartnerLogoProps> = ({ partner }) => {
+  const [error, setError] = useState(false);
+  const logoUrl = `https://logo.clearbit.com/${partner.domain}?size=200`;
+
+  return (
+    <a 
+      href={`https://${partner.domain}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-center h-40 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden"
+      title={`Visit ${partner.name}`}
+    >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#3498db] to-[#0a1d4a] transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+      
+      <div className="relative w-full h-full flex flex-col items-center justify-center space-y-4">
+        {!error ? (
+          <img 
+            src={logoUrl} 
+            alt={partner.name} 
+            className="max-w-[85%] max-h-[60%] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-700"
+            onError={() => setError(true)}
+          />
+        ) : (
+          <div className="text-center px-4 py-3 bg-blue-50/50 rounded-2xl w-full h-full flex flex-col items-center justify-center border border-dashed border-blue-100 group-hover:border-blue-300 transition-colors">
+            <Building2 size={24} className="text-[#3498db] mb-2 opacity-40" />
+            <span className="text-[10px] font-black uppercase tracking-tighter text-[#0a1d4a] leading-tight block">
+              {partner.name}
+            </span>
+          </div>
+        )}
+        
+        <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Globe size={10} className="text-[#3498db]" />
+          <span className="text-[8px] font-black uppercase tracking-widest text-[#3498db] text-center leading-none">
+            {partner.domain}
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+};
 
 interface HomeProps {
   t: (key: string) => string;
@@ -11,37 +57,47 @@ interface HomeProps {
 
 const Home: React.FC<HomeProps> = ({ t, lang }) => {
   const partners = [
-    { name: "Bangkok Hospital", logo: "https://www.bangkokhospital.com/assets/images/logo.png" },
-    { name: "Bumrungrad International", logo: "https://www.bumrungrad.com/getattachment/03f0b24e-765e-4b77-8d0b-6f8e7f7b6b1e/logo.png" },
-    { name: "Samitivej Hospitals", logo: "https://www.samitivejhospitals.com/assets/images/logo-samitivej.png" },
-    { name: "MedPark Hospital", logo: "https://www.medparkhospital.com/assets/images/logo-medpark.png" },
-    { name: "Phyathai Hospital", logo: "https://www.phyathai.com/assets/images/logo-phyathai.png" },
-    { name: "Yanhee Hospital", logo: "https://www.yanhee.net/wp-content/themes/yanhee/assets/img/logo.png" },
-    { name: "Vejthani Hospital", logo: "https://www.vejthani.com/wp-content/themes/vejthani/assets/images/logo.png" },
-    { name: "Praram 9 Hospital", logo: "https://www.praram9.com/wp-content/themes/praram9/assets/img/logo.png" },
-    { name: "Thonburi Hospital", logo: "https://www.thonburihospital.com/wp-content/themes/thonburi/assets/img/logo.png" },
-    { name: "RAKxa Wellness", logo: "https://rakxawellness.com/wp-content/themes/rakxa/assets/images/logo.svg" },
+    { name: "BPK 9 International", domain: "bangpakokhospital.com" },
+    { name: "Bangkok Siriroj", domain: "phuketinternationalhospital.com" },
+    { name: "Yanhee International", domain: "yanhee.net" },
+    { name: "Vejthani Hospital", domain: "vejthani.com" },
+    { name: "CHG Chularat 3", domain: "chularat.com" },
+    { name: "Phyathai 1", domain: "phyathai.com" },
+    { name: "Phyathai 2", domain: "phyathai.com" },
+    { name: "Phyathai 3", domain: "phyathai.com" },
+    { name: "Bumrungrad", domain: "bumrungrad.com" },
+    { name: "VitalLife", domain: "vitallifeintegratedhealth.com" },
+    { name: "MedPark", domain: "medparkhospital.com" },
+    { name: "Samitivej Sukhumvit", domain: "samitivejhospitals.com" },
+    { name: "Panacee", domain: "panacee.com" },
+    { name: "Zen Cell", domain: "zencellthailand.com" },
+    { name: "Rutnin Eye", domain: "rutnin.com" },
+    { name: "Praram 9", domain: "praram9.com" },
+    { name: "Arun Health Garden", domain: "arunhealthgarden.com" },
+    { name: "Kasemrad International", domain: "kasemrad.co.th" },
+    { name: "Thonburi Bamrungmuang", domain: "thonburihospital.com" },
+    { name: "RAKxa Wellness", domain: "rakxawellness.com" },
   ];
 
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center overflow-hidden bg-[#0a1d4a]">
+      <section className="relative h-[650px] flex items-center overflow-hidden bg-[#0a1d4a]">
         <img 
           src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1600&auto=format&fit=crop" 
           alt="Luxury Medical Concierge" 
-          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a1d4a] via-[#0a1d4a]/80 to-transparent"></div>
         <div className="relative max-w-7xl mx-auto px-4 z-10 text-white space-y-8">
-          <div className="inline-flex items-center space-x-2 bg-[#3498db]/20 border border-[#3498db]/40 rounded-full px-4 py-2 backdrop-blur-md">
-            <Award size={16} className="text-[#3498db]" />
+          <div className="inline-flex items-center space-x-2 bg-blue-500/20 border border-blue-400/40 rounded-full px-4 py-2 backdrop-blur-md">
+            <Award size={16} className="text-blue-400" />
             <span className="text-xs font-black uppercase tracking-[0.2em]">{t('welcome')}</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black max-w-3xl leading-[1.1] uppercase">
             {t('hero_title')}
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-xl font-medium leading-relaxed">
+          <p className="text-xl md:text-2xl text-blue-100/70 max-w-xl font-medium leading-relaxed">
             {t('hero_subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 pt-4">
@@ -77,22 +133,31 @@ const Home: React.FC<HomeProps> = ({ t, lang }) => {
         ))}
       </section>
 
-      {/* Partner Logos Section */}
-      <section className="max-w-7xl mx-auto px-4 py-16 space-y-10">
-        <div className="text-center space-y-2">
-           <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#3498db]">World Class Network</h2>
-           <h3 className="text-3xl font-black text-[#0a1d4a] uppercase">Our Elite Strategic Partners</h3>
+      {/* Dynamic Partner Logos Section */}
+      <section className="max-w-7xl mx-auto px-4 py-24 space-y-16">
+        <div className="text-center space-y-4 max-w-2xl mx-auto">
+           <div className="flex items-center justify-center space-x-3 mb-2">
+             <div className="w-12 h-px bg-gray-200"></div>
+             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#3498db]">Exclusive Network</h2>
+             <div className="w-12 h-px bg-gray-200"></div>
+           </div>
+           <h3 className="text-4xl font-black text-[#0a1d4a] uppercase tracking-tight">Our Elite Strategic Partners</h3>
+           <p className="text-gray-400 text-sm font-bold uppercase tracking-widest leading-relaxed">
+             Direct Priority Access to the Region's Most Prestigious JCI-Accredited Medical Institutions.
+           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8">
            {partners.map((partner, i) => (
-             <div key={i} className="p-6 bg-white rounded-2xl border border-gray-50 shadow-sm flex items-center justify-center h-24 group hover:shadow-md transition-all">
-                {/* fallback to text if image fails or for cleaner look in this demo */}
-                <div className="text-center group-hover:scale-105 transition-transform">
-                   <p className="text-[10px] font-black uppercase tracking-tighter text-gray-400 group-hover:text-[#3498db] transition-colors">{partner.name}</p>
-                   <Building2 size={24} className="mx-auto mt-2 text-gray-200 group-hover:text-[#3498db]/30 transition-colors" />
-                </div>
-             </div>
+             <PartnerLogo key={i} partner={partner} />
            ))}
+        </div>
+
+        <div className="pt-12 text-center">
+          <Link to="/services" className="inline-flex items-center space-x-2 text-[#3498db] hover:text-[#0a1d4a] font-black uppercase tracking-widest text-[10px] transition-colors group">
+            <span>Explore full network services</span>
+            <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </section>
 

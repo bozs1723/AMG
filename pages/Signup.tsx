@@ -7,9 +7,10 @@ import Logo from '../components/Logo';
 
 interface SignupProps {
   t: (key: string) => string;
+  onLogin: () => Promise<void>;
 }
 
-const Signup: React.FC<SignupProps> = ({ t }) => {
+export default function Signup({ t, onLogin }: SignupProps) {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,14 +30,10 @@ const Signup: React.FC<SignupProps> = ({ t }) => {
     setError(null);
     
     try {
-      // ในโหมด Mock ฟังก์ชัน signUp จะบันทึกข้อมูลลง LocalStorage ทันที
       await db.signUp(email, password, fullName);
-      
-      // เพื่อความสะดวกในการทดสอบ: หลังจากสมัครเสร็จ ให้ทำการ Login ทันที
       await db.signIn(email, password);
-      
-      // ใช้ window.location.href เพื่อรีโหลด State ทั้งแอปให้เห็นว่าเป็น Member แล้ว
-      window.location.href = '/#/profile'; 
+      await onLogin();
+      navigate('/');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
       setIsLoading(false);
@@ -159,6 +156,4 @@ const Signup: React.FC<SignupProps> = ({ t }) => {
       </div>
     </div>
   );
-};
-
-export default Signup;
+}

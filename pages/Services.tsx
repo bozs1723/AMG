@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Shield, Plane, Briefcase, HeartPulse, Sparkles, Building2, ChevronRight, Stethoscope, Microscope, Activity } from 'lucide-react';
 import { Language } from '../types';
 
@@ -7,6 +7,35 @@ interface ServicesProps {
   t: (key: string) => string;
   lang: Language;
 }
+
+const ServicePartnerCard: React.FC<{ partner: { name: string, domain: string } }> = ({ partner }) => {
+  const [error, setError] = useState(false);
+  const logoUrl = `https://logo.clearbit.com/${partner.domain}`;
+
+  return (
+    <div className="group p-8 bg-white rounded-[2.5rem] border border-white/10 hover:shadow-2xl hover:scale-105 transition-all duration-300 flex flex-col items-center justify-center space-y-4 text-center aspect-square shadow-sm">
+      <div className="w-full h-full flex items-center justify-center p-2">
+        {!error ? (
+          <img 
+            src={logoUrl} 
+            alt={partner.name} 
+            className="max-w-full max-h-[70%] object-contain filter grayscale group-hover:grayscale-0 transition-all duration-500"
+            onError={() => setError(true)}
+          />
+        ) : (
+          <div className="p-6 bg-blue-50/50 rounded-3xl w-full h-full flex items-center justify-center border border-dashed border-blue-100">
+            <span className="text-xs font-black uppercase tracking-tight text-[#3498db] leading-tight">
+              {partner.name}
+            </span>
+          </div>
+        )}
+      </div>
+      <span className="text-[9px] font-black uppercase tracking-widest leading-tight text-gray-400 group-hover:text-[#3498db] transition-colors">
+        {partner.name}
+      </span>
+    </div>
+  );
+};
 
 const Services: React.FC<ServicesProps> = ({ t, lang }) => {
   const serviceCategories = [
@@ -33,21 +62,26 @@ const Services: React.FC<ServicesProps> = ({ t, lang }) => {
   ];
 
   const partners = [
-    { name: "BPK 9 International", color: "text-[#e74c3c]" },
-    { name: "Bangkok Hospital Siriroj", color: "text-[#0a1d4a]" },
-    { name: "Yanhee International", color: "text-[#3498db]" },
-    { name: "Vejthani Hospital", color: "text-[#0a1d4a]" },
-    { name: "CHG Chularat 3", color: "text-[#3498db]" },
-    { name: "Phyathai 1 & 2 & 3", color: "text-[#27ae60]" },
-    { name: "Bumrungrad International", color: "text-[#0a1d4a]" },
-    { name: "VitalLife", color: "text-[#d4af37]" },
-    { name: "MedPark Hospital", color: "text-[#0a1d4a]" },
-    { name: "Samitivej Sukhumvit", color: "text-[#27ae60]" },
-    { name: "Panacee Medical Center", color: "text-[#d4af37]" },
-    { name: "Zen Cell Rejuvenation", color: "text-[#e74c3c]" },
-    { name: "Rutnin Eye Hospital", color: "text-[#0a1d4a]" },
-    { name: "Praram 9 Hospital", color: "text-[#27ae60]" },
-    { name: "RAKxa Bang Krachao", color: "text-[#0a1d4a]" }
+    { name: "BPK 9 International", domain: "bangpakokhospital.com" },
+    { name: "Bangkok Siriroj", domain: "phuketinternationalhospital.com" },
+    { name: "Yanhee International", domain: "yanhee.net" },
+    { name: "Vejthani Hospital", domain: "vejthani.com" },
+    { name: "CHG Chularat 3", domain: "chularat.com" },
+    { name: "Phyathai 1", domain: "phyathai.com" },
+    { name: "Phyathai 2", domain: "phyathai.com" },
+    { name: "Phyathai 3", domain: "phyathai.com" },
+    { name: "Bumrungrad", domain: "bumrungrad.com" },
+    { name: "VitalLife", domain: "vitallifeintegratedhealth.com" },
+    { name: "MedPark", domain: "medparkhospital.com" },
+    { name: "Samitivej Sukhumvit", domain: "samitivejhospitals.com" },
+    { name: "Panacee", domain: "panacee.com" },
+    { name: "Zen Cell", domain: "zencellthailand.com" },
+    { name: "Rutnin Eye", domain: "rutnin.com" },
+    { name: "Praram 9", domain: "praram9.com" },
+    { name: "Arun Health Garden", domain: "arunhealthgarden.com" },
+    { name: "Kasemrad International", domain: "kasemrad.co.th" },
+    { name: "Thonburi Bamrungmuang", domain: "thonburihospital.com" },
+    { name: "RAKxa Wellness", domain: "rakxawellness.com" },
   ];
 
   return (
@@ -88,35 +122,24 @@ const Services: React.FC<ServicesProps> = ({ t, lang }) => {
            <p className="text-blue-100/60 font-medium">Direct priority access to Asia's most prestigious JCI-accredited medical institutions.</p>
         </div>
         
-        <div className="relative z-10 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {partners.map((partner, i) => (
-            <div key={i} className="group p-8 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="p-4 bg-white/10 rounded-2xl group-hover:scale-110 transition-transform">
-                 <Building2 size={24} className="text-blue-300" />
-              </div>
-              <span className={`text-[10px] font-black uppercase tracking-widest leading-tight transition-colors group-hover:text-white`}>
-                {partner.name}
-              </span>
-            </div>
+            <ServicePartnerCard key={i} partner={partner} />
           ))}
         </div>
 
-        <div className="relative z-10 pt-16 flex justify-center">
-           <div className="inline-flex items-center space-x-8 px-10 py-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl">
-              <div className="flex items-center space-x-3">
-                 <Shield className="text-green-400" size={20} />
-                 <span className="text-[10px] font-black uppercase tracking-widest">JCI Accredited</span>
-              </div>
-              <div className="w-[1px] h-4 bg-white/20"></div>
-              <div className="flex items-center space-x-3">
-                 <Stethoscope className="text-blue-400" size={20} />
-                 <span className="text-[10px] font-black uppercase tracking-widest">Certified Specialists</span>
-              </div>
-              <div className="w-[1px] h-4 bg-white/20"></div>
-              <div className="flex items-center space-x-3">
-                 <Activity className="text-rose-400" size={20} />
-                 <span className="text-[10px] font-black uppercase tracking-widest">Global Standards</span>
-              </div>
+        <div className="relative z-10 pt-16 flex flex-wrap justify-center gap-8">
+           <div className="inline-flex items-center space-x-3 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl">
+              <Shield className="text-green-400" size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">JCI Accredited Partners</span>
+           </div>
+           <div className="inline-flex items-center space-x-3 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl">
+              <Stethoscope className="text-blue-400" size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Certified Specialists</span>
+           </div>
+           <div className="inline-flex items-center space-x-3 px-6 py-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl">
+              <Activity className="text-rose-400" size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Global Standards</span>
            </div>
         </div>
       </section>
